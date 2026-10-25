@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Music Player</title>
+<style>
+body{margin:0;background:#11111b;color:white;font-family:Arial,sans-serif;display:grid;place-items:center;min-height:100vh}
+.player{width:min(340px,85vw);padding:24px;border-radius:24px;background:#201c30;text-align:center;box-shadow:0 15px 50px #0008}
+.cover{height:210px;border-radius:18px;background:linear-gradient(135deg,#603e8b,#191526);display:grid;place-items:center;font-size:90px;color:#e3c5ff}
+h2{font-size:22px;margin-bottom:6px}
+p{color:#b9adc9;font-size:14px}
+input{width:100%;accent-color:#c49aff}
+button{border:0;border-radius:12px;padding:12px;margin:5px;background:#38304c;color:white;font-size:18px}
+.play{background:#c49aff;color:#21152e;padding:15px 22px}
+</style>
+</head>
+<body>
+<div class="player">
+  <div class="cover">♫</div>
+  <h2 id="title">My Music</h2>
+  <p>Personal playlist</p>
+  <audio id="audio" preload="metadata"></audio>
+  <input id="seek" type="range" min="0" max="100" value="0">
+  <p id="time">0:00 / 0:00</p>
+  <button onclick="prev()">⏮</button>
+  <button class="play" onclick="toggle()" id="play">▶</button>
+  <button onclick="next()">⏭</button>
+  <p>Volume</p>
+  <input id="volume" type="range" min="0" max="1" step=".05" value=".8">
+  <p id="status">Ready to play</p>
+</div>
+<script>
+const songs=[
+ {title:"Song One",url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"},
+ {title:"Song Two",url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"},
+ {title:"Song Three",url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"}
+];
+const audio=document.getElementById("audio");
+let current=0;
+function load(){audio.src=songs[current].url;document.getElementById("title").textContent=songs[current].title;document.getElementById("status").textContent="Ready to play";}
+function toggle(){if(audio.paused){audio.play().catch(()=>document.getElementById("status").textContent="Check your audio link");}else audio.pause();}
+function next(){current=(current+1)%songs.length;load();audio.play().catch(()=>{});}
+function prev(){current=(current-1+songs.length)%songs.length;load();audio.play().catch(()=>{});}
+audio.onplay=()=>document.getElementById("play").textContent="Ⅱ";
+audio.onpause=()=>document.getElementById("play").textContent="▶";
+audio.ontimeupdate=()=>{
+ document.getElementById("time").textContent=fmt(audio.currentTime)+" / "+fmt(audio.duration);
+ document.getElementById("seek").value=audio.duration?audio.currentTime/audio.duration*100:0;
+};
+audio.onended=next;
+function fmt(t){return Number.isFinite(t)?Math.floor(t/60)+":"+String(Math.floor(t%60)).padStart(2,"0"):"0:00";}
+document.getElementById("seek").oninput=e=>{if(audio.duration)audio.currentTime=e.target.value/100*audio.duration;};
+document.getElementById("volume").oninput=e=>audio.volume=Number(e.target.value);
+load();audio.volume=.8;
+</script>
+</body>
+</html>
